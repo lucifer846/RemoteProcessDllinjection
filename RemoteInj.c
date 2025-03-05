@@ -39,11 +39,12 @@ BOOL InjectDllToRemoteProcess(HANDLE hProcess, TCHAR* DllName) {
     LPTHREAD_START_ROUTINE pLoadLibraryW = (LPTHREAD_START_ROUTINE)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "LoadLibraryW");
     if (pLoadLibraryW == NULL) return FALSE;
 
-    SIZE_T dwSizeToWrite = (_tcslen(DllName) + 1) * sizeof(TCHAR);
+    SIZE_T dwSizeToWrite = (_tcslen(DllName) + 1) * sizeof(TCHAR); // byte size of dllName 
     LPVOID pAddress = VirtualAllocEx(hProcess, NULL, dwSizeToWrite, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (pAddress == NULL) return FALSE;
 
     SIZE_T lpNumberOfBytesWritten = 0;
+    // Write DllName (path string to DLL) which is later used by CreateRemoteThread when calling LoadLibraryW(pAddress)
     if (!WriteProcessMemory(hProcess, pAddress, DllName, dwSizeToWrite, &lpNumberOfBytesWritten)) {
         VirtualFreeEx(hProcess, pAddress, 0, MEM_RELEASE);
         return FALSE;
